@@ -1,0 +1,102 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|c:\\users\\giugg\\onedrive\\desktop\\coding\\progetti\\betauni\\controllers\\professorscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|solutionrelative:controllers\\professorscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|c:\\users\\giugg\\onedrive\\desktop\\coding\\progetti\\betauni\\controllers\\studentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|solutionrelative:controllers\\studentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|c:\\users\\giugg\\onedrive\\desktop\\coding\\progetti\\betauni\\controllers\\departmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|solutionrelative:controllers\\departmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|c:\\users\\giugg\\onedrive\\desktop\\coding\\progetti\\betauni\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|solutionrelative:controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|c:\\users\\giugg\\onedrive\\desktop\\coding\\progetti\\betauni\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CAFE6FDB-D1C7-47C8-95E9-F1BB3F8C9B93}|BetaUni.csproj|solutionrelative:models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DepartmentsController.cs",
+              "DocumentMoniker": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\DepartmentsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\DepartmentsController.cs",
+              "ToolTip": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\DepartmentsController.cs",
+              "RelativeToolTip": "Controllers\\DepartmentsController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T13:03:42.598Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Student.cs",
+              "DocumentMoniker": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Models\\Student.cs",
+              "RelativeDocumentMoniker": "Models\\Student.cs",
+              "ToolTip": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Models\\Student.cs",
+              "RelativeToolTip": "Models\\Student.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAA/wBwAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T13:02:34.613Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CoursesController.cs",
+              "DocumentMoniker": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\CoursesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CoursesController.cs",
+              "ToolTip": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\CoursesController.cs",
+              "RelativeToolTip": "Controllers\\CoursesController.cs",
+              "ViewState": "AgIAAHIAAAAAAAAAAIAwwIYAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T13:01:36.887Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "StudentsController.cs",
+              "DocumentMoniker": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\StudentsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\StudentsController.cs",
+              "ToolTip": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\StudentsController.cs",
+              "RelativeToolTip": "Controllers\\StudentsController.cs",
+              "ViewState": "AgIAAJQAAAAAAAAAAAAowJ8AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T12:19:12.742Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProfessorsController.cs",
+              "DocumentMoniker": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\ProfessorsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProfessorsController.cs",
+              "ToolTip": "C:\\Users\\giugg\\OneDrive\\Desktop\\coding\\progetti\\BetaUni\\Controllers\\ProfessorsController.cs*",
+              "RelativeToolTip": "Controllers\\ProfessorsController.cs*",
+              "ViewState": "AgIAAJIAAAAAAAAAAAAmwKMAAABGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T12:19:00.407Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
