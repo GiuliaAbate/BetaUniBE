@@ -122,6 +122,35 @@ namespace BetaUni.Controllers
 
         #region GET
 
+        //Metodo per prendere tutti i corsi data una facoltà (senza utente loggato)
+        [HttpGet("GetCoursesByDep/{depID}")]
+        public async Task<IActionResult> GetCoursesByDep(string depID)
+        {
+            var course = await _context.Courses
+                .Where(c => c.DepartmentId == depID)
+                .Select(c => new
+                {
+                    c.Name,
+                    c.StartDate,
+                    c.EndDate,
+                    Classrooms = c.Classrooms.Select(cl => new
+                    {
+                        cl.Name,
+                        cl.Number,
+                        cl.MaxCapacity,
+                        cl.CourseId
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            if (course == null)
+            {
+                return NotFound("Nessun corso trovato");
+            }
+
+            return Ok(course);
+        }
+
         //Metodo per prendere tutti i corsi guardando la facoltà
         [HttpGet("DepCourses")]
         public async Task<IActionResult> GetCoursesFromDepartment()
@@ -132,7 +161,7 @@ namespace BetaUni.Controllers
                 .Where(s => s.StudId.Equals(studID))
                 .FirstOrDefaultAsync();
 
-            if(student == null)
+            if (student == null)
             {
                 return NotFound("Utente non trovato");
             }

@@ -42,6 +42,25 @@ namespace BetaUni.Controllers
             return laboratory;
         }
 
+        [HttpGet("GetLabsByDep/{depID}")]
+        public async Task<IActionResult> GetLabsByDep(string depID)
+        {
+            var laboratory = await _context.Laboratories
+                .Where(c => c.DepartmentId == depID)
+                .Select(c => new
+                {
+                    c.Name,
+                    c.Attendance,
+                }).ToListAsync();
+
+            if (laboratory == null)
+            {
+                return NotFound("Nessun laboratorio trovato");
+            }
+
+            return Ok(laboratory);
+        }
+
         // PUT: api/Laboratories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
