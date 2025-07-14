@@ -152,6 +152,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo per prendere tutti i corsi guardando la facoltà
+        [Authorize]
         [HttpGet("DepCourses")]
         public async Task<IActionResult> GetCoursesFromDepartment()
         {

@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +63,35 @@ namespace BetaUni.Controllers
             }
 
             return Ok(selectedExams);
+        }
 
+        //Metodo per prendere esami in programma (futuri) di uno studente
+        [Authorize]
+        [HttpGet("FutureExams")]
+        public async Task<IActionResult> GetFutureExams()
+        {
+            var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(studID))
+            {
+                return Unauthorized("Utente non autenticato");
+            }
+
+            var exams = await _context.ExamRegistrations
+                .Where(s => s.StudId == studID)
+                .Include(e => e.Exam)
+                .Select(e => new
+                {
+                    e.Exam.Name,
+                    e.Exam.Cfu,
+                    e.Exam.Date
+                }).ToListAsync();
+
+            if(exams == null)
+            {
+                return NotFound("Nessun esame selezionato");
+            }
+
+            return Ok(exams);
         }
         #endregion
 

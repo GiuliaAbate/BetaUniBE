@@ -1,5 +1,6 @@
 ﻿using BetaUni.Models;
 using BetaUni.Other;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +128,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo con la quale lo studente potrà vedere i suoi dati, quindi si prende il token per capire chi è l'utente
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("ViewStudentInfo")]
         public async Task<IActionResult> GetStudentInfo()
         {
@@ -135,6 +137,8 @@ namespace BetaUni.Controllers
             {
                 return Unauthorized("Utente non autenticato");
             }
+
+            Console.WriteLine($"Token valido. ID utente: {studID}");
 
             var student = await _context.Students.FindAsync(studID);
 

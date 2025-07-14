@@ -13,6 +13,12 @@ public partial class Laboratory
 
     public string DepartmentId { get; set; } = null!;
 
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
+    public virtual ICollection<Classroom>? Classrooms { get; set; } = new List<Classroom>();
+
     public virtual Department? Department { get; set; } = null!;
 
     public virtual ICollection<ProfessorLab>? ProfessorLabs { get; set; } = new List<ProfessorLab>();

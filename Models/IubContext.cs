@@ -50,12 +50,16 @@ public partial class IubContext : DbContext
                 .HasMaxLength(4)
                 .IsFixedLength()
                 .HasColumnName("CourseID");
+            entity.Property(e => e.LabId).HasColumnName("LabID");
             entity.Property(e => e.Name).HasMaxLength(100);
 
             entity.HasOne(d => d.Course).WithMany(p => p.Classrooms)
                 .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Classrooms_Departments");
+                .HasConstraintName("FK_Classrooms_Courses");
+
+            entity.HasOne(d => d.Lab).WithMany(p => p.Classrooms)
+                .HasForeignKey(d => d.LabId)
+                .HasConstraintName("FK_Classrooms_Laboratories");
         });
 
         modelBuilder.Entity<Course>(entity =>

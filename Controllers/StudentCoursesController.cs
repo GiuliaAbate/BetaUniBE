@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -135,6 +136,7 @@ namespace BetaUni.Controllers
         //Metodo per permettere allo studente di iscriversi e partecipare ad un corso
         //Quindi l'utente si fa un piano di studi, in cui per prima cosa sceglie i corsi della propria facoltà
         //Si deve prendere automaticamente id utente, id corso e metterli nella tabella
+        [Authorize]
         [HttpPost("CourseRegistration/{courseId}")]
         public async Task<IActionResult> AddToStudyPlan(string courseId)
         {
