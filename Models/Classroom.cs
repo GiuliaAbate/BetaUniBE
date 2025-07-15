@@ -13,7 +13,11 @@ public partial class Classroom
 
     public int MaxCapacity { get; set; }
 
-    public string CourseId { get; set; } = null!;
+    public string? CourseId { get; set; }
 
-    public virtual Course? Course { get; set; } = null!;
+    public int? LabId { get; set; }
+
+    public virtual Course? Course { get; set; }
+
+    public virtual Laboratory? Lab { get; set; }
 }

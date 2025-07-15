@@ -189,6 +189,7 @@ namespace BetaUni.Controllers
             var exam = await _context.Exams
                 .Where(e=>e.ExamId == examId && e.CourseId == courseId)
                 .FirstOrDefaultAsync();
+
             if (exam == null)
             {
                 return NotFound("Esame non trovato");

@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -139,6 +140,56 @@ namespace BetaUni.Controllers
 
             return Ok(exams);
         }
+
+        //Prendere dati esame includendo anche il prof (quindi da tabella ProfCourseExam)
+        //v2 di quello sopra
+        [Authorize]
+        [HttpGet("GetExamsInfo")]
+        public async Task<ActionResult<IEnumerable<ExamInfos>>> GetExamsFull()
+        {
+            var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(studID))
+            {
+                return Unauthorized("Utente non trovato");
+            }
+
+            var courses = await _context.StudentCourses
+            .Where(sc => sc.StudId == studID)
+            .Select(sc => sc.CourseId)
+            .ToListAsync();
+
+            var exams = await _context.Exams
+                .Include(e => e.Course)
+                .Include(pc => pc.ProfCourseExams)
+                    .ThenInclude(p => p.Prof)
+                .Where(e => courses.Contains(e.CourseId))
+                .Select(ex => new ExamInfos
+                {
+                    ExamId = ex.ExamId,
+                    Name = ex.Name,
+                    Cfu = ex.Cfu,
+                    Type = ex.Type,
+                    CourseId = ex.CourseId,
+                    ProfessorSurname = ex.ProfCourseExams.FirstOrDefault() != null
+                                ? ex.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                                : null,              
+                    Date = ex.Date
+                }).ToListAsync();
+
+            return Ok(exams);
+        }
         #endregion
     }
+}
+
+//classe copia con anche il nome del prof e facoltà
+public class ExamInfos
+{
+    public int ExamId { get; set; }
+    public string Name { get; set; }
+    public int Cfu { get; set; }
+    public string Type { get; set; }
+    public string CourseId { get; set; }
+    public string? ProfessorSurname { get; set; }
+    public DateOnly Date { get; set; }
 }

@@ -68,7 +68,7 @@ namespace BetaUni.Controllers
         //Metodo per prendere esami in programma (futuri) di uno studente
         [Authorize]
         [HttpGet("FutureExams")]
-        public async Task<IActionResult> GetFutureExams()
+        public async Task<ActionResult<IEnumerable<ExamInfos>>> GetFutureExams()
         {
             var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(studID))
@@ -79,14 +79,22 @@ namespace BetaUni.Controllers
             var exams = await _context.ExamRegistrations
                 .Where(s => s.StudId == studID)
                 .Include(e => e.Exam)
-                .Select(e => new
+                    .ThenInclude(pc => pc.ProfCourseExams)
+                    .ThenInclude(p => p.Prof)
+                .Select(e => new ExamInfos
                 {
-                    e.Exam.Name,
-                    e.Exam.Cfu,
-                    e.Exam.Date
+                    ExamId = e.Exam.ExamId,
+                    Name = e.Exam.Name,
+                    Cfu = e.Exam.Cfu,
+                    Type = e.Exam.Type,
+                    CourseId = e.Exam.CourseId,
+                    ProfessorSurname = e.Exam.ProfCourseExams.FirstOrDefault() != null
+                        ? e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                        : null,
+                    Date = e.Exam.Date
                 }).ToListAsync();
 
-            if(exams == null)
+            if (exams == null)
             {
                 return NotFound("Nessun esame selezionato");
             }

@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -60,6 +61,29 @@ namespace BetaUni.Controllers
 
             return Ok(laboratory);
         }
+
+        [Authorize]
+        [HttpGet("DepLabs")]
+        public async Task<IActionResult> GetLabsFromDepartment()
+        {
+            var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var student = await _context.Students
+                .Include(s => s.Department)
+                .Where(s => s.StudId.Equals(studID))
+                .FirstOrDefaultAsync();
+
+            if (student == null)
+            {
+                return NotFound("Utente non trovato");
+            }
+
+            var lab = await _context.Laboratories
+                .Where(c => c.DepartmentId.Equals(student.DepartmentId))
+                .ToListAsync();
+
+            return Ok(lab);
+        }
+
 
         // PUT: api/Laboratories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
