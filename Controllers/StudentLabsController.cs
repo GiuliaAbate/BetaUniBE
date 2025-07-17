@@ -21,7 +21,7 @@ namespace BetaUni.Controllers
             _context = context;
         }
 
-        
+
         // PUT: api/StudentLabs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -109,7 +109,7 @@ namespace BetaUni.Controllers
 
         //Metodo in cui si vanno a prendere tutti i laboratori aggiunti da uno studente
         [HttpGet("LabsByStudent")]
-        public async Task<ActionResult<StudentLab>> GetSelectedLabs()
+        public async Task<ActionResult<IEnumerable<LabInfos>>> GetSelectedLabs()
         {
             var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(studID))
@@ -118,16 +118,37 @@ namespace BetaUni.Controllers
             }
 
             var selectedLabs = await _context.StudentLabs
-                .Where(s => s.StudId == studID).ToListAsync();
+                .Where(s => s.StudId == studID)
+                .Include(s => s.Lab)
+                    .ThenInclude(l => l.Classrooms)
+                .Include(s => s.Lab)
+                    .ThenInclude(l => l.ProfessorLabs)
+                        .ThenInclude(pl => pl.Prof)
+                .Select(s => new LabInfos
+                {
+                    LabId = s.Lab.LabId,
+                    Name = s.Lab.Name,
+                    Attendance = s.Lab.Attendance,
+                    StartDate = s.Lab.StartDate,
+                    EndDate = s.Lab.EndDate,
+                    ProfessorSurname = s.Lab.ProfessorLabs.FirstOrDefault() != null
+                        ? s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Surname
+                        : null,
+                    Classroom = s.Lab.Classrooms.FirstOrDefault() != null
+                        ? s.Lab.Classrooms.FirstOrDefault()!.Name
+                        : null
+                })
+                .ToListAsync();
 
-            if (selectedLabs == null)
+            if (selectedLabs == null || !selectedLabs.Any())
             {
                 return NotFound("Nessun laboratorio selezionato");
             }
 
             return Ok(selectedLabs);
-
         }
+
+      
         #endregion
 
         #region POST
@@ -193,4 +214,24 @@ namespace BetaUni.Controllers
         }
         #endregion
     }
+}
+
+public class LabInfos
+{
+    public int LabId { get; set; }
+
+    public string Name { get; set; }
+
+    public string Attendance { get; set; }
+
+
+    public string? ProfessorSurname { get; set; }
+
+    public string? Classroom { get; set; }
+
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
 }

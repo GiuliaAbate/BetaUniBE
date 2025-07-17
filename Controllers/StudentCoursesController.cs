@@ -109,8 +109,30 @@ namespace BetaUni.Controllers
         }
 
         //Metodo in cui si vanno a prendere tutti i corsi aggiunti da uno studente
+        //[HttpGet("CoursesByStudent")]
+        //public async Task<ActionResult<StudentCourse>> GetSelectedCourses()
+        //{
+        //    var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (string.IsNullOrEmpty(studID))
+        //    {
+        //        return Unauthorized("Utente non autenticato");
+        //    }
+
+        //    var selectedCourses = await _context.StudentCourses
+        //        .Where(s => s.StudId == studID).ToListAsync();
+
+        //    if(selectedCourses == null)
+        //    {
+        //        return NotFound("Nessun corso selezionato");
+        //    }
+
+        //    return Ok(selectedCourses);
+
+        //}
+
+        //v2
         [HttpGet("CoursesByStudent")]
-        public async Task<ActionResult<StudentCourse>> GetSelectedCourses()
+        public async Task<ActionResult<IEnumerable<CourseInfos>>> GetSelectedCourses()
         {
             var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(studID))
@@ -119,9 +141,27 @@ namespace BetaUni.Controllers
             }
 
             var selectedCourses = await _context.StudentCourses
-                .Where(s => s.StudId == studID).ToListAsync();
+                .Where(s => s.StudId == studID)
+                .Include(c => c.Course)
+                    .ThenInclude(cl => cl.Classrooms)
+                 .Include(c => c.Course)
+                    .ThenInclude(pc => pc.ProfCourseExams)
+                    .ThenInclude(p => p.Prof)
+                .Select(c => new CourseInfos
+                {
+                    CourseId = c.Course.CourseId,
+                    Name = c.Course.Name,
+                    StartDate = c.Course.StartDate,
+                    EndDate = c.Course.EndDate,
+                    ProfessorSurname = c.Course.ProfCourseExams.FirstOrDefault() != null
+                        ? c.Course.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                        : null,
+                    Classroom = c.Course.Classrooms.FirstOrDefault() != null
+                        ? c.Course.Classrooms.FirstOrDefault()!.Name
+                        : null
+                }).ToListAsync();
 
-            if(selectedCourses == null)
+            if (selectedCourses == null)
             {
                 return NotFound("Nessun corso selezionato");
             }
@@ -130,7 +170,7 @@ namespace BetaUni.Controllers
 
         }
 
-        #endregion 
+        #endregion
 
         #region POST
         //Metodo per permettere allo studente di iscriversi e partecipare ad un corso
@@ -198,4 +238,20 @@ namespace BetaUni.Controllers
         }
         #endregion
     }
+}
+
+public class CourseInfos
+{
+    public string CourseId { get; set; } 
+
+    public string Name { get; set; }
+
+    public string? ProfessorSurname { get; set; }
+
+    public string? Classroom { get; set; }
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
 }

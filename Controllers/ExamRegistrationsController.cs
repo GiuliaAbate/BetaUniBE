@@ -45,8 +45,29 @@ namespace BetaUni.Controllers
         }
 
         //Metodo in cui si vanno a prendere tutti gli esami a cui lo studente è iscritto
+        //[HttpGet("ExamsByStudent")]
+        //public async Task<ActionResult<ExamRegistration>> GetSelectedExams()
+        //{
+        //    var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (string.IsNullOrEmpty(studID))
+        //    {
+        //        return Unauthorized("Utente non autenticato");
+        //    }
+
+        //    var selectedExams = await _context.ExamRegistrations
+        //        .Where(s => s.StudId == studID).ToListAsync();
+
+        //    if (selectedExams == null)
+        //    {
+        //        return NotFound("Nessun esame selezionato");
+        //    }
+
+        //    return Ok(selectedExams);
+        //}
+
+        //v2
         [HttpGet("ExamsByStudent")]
-        public async Task<ActionResult<ExamRegistration>> GetSelectedExams()
+        public async Task<ActionResult<IEnumerable<ExamInfos>>> GetSelectedExams()
         {
             var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(studID))
@@ -55,7 +76,22 @@ namespace BetaUni.Controllers
             }
 
             var selectedExams = await _context.ExamRegistrations
-                .Where(s => s.StudId == studID).ToListAsync();
+                .Where(s => s.StudId == studID)
+                .Include(e => e.Exam)
+                    .ThenInclude(pc => pc.ProfCourseExams)
+                    .ThenInclude(p => p.Prof)
+                .Select(e => new ExamInfos
+                {
+                    ExamId = e.Exam.ExamId,
+                    Name = e.Exam.Name,
+                    Cfu = e.Exam.Cfu,
+                    Type = e.Exam.Type,
+                    CourseId = e.Exam.CourseId,
+                    ProfessorSurname = e.Exam.ProfCourseExams.FirstOrDefault() != null
+                        ? e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                        : null,
+                    Date = e.Exam.Date
+                }).ToListAsync();
 
             if (selectedExams == null)
             {
