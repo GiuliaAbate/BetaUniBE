@@ -126,13 +126,15 @@ namespace BetaUni.Controllers
                         .ThenInclude(pl => pl.Prof)
                 .Select(s => new LabInfos
                 {
+                    Id = s.Id,
                     LabId = s.Lab.LabId,
                     Name = s.Lab.Name,
                     Attendance = s.Lab.Attendance,
                     StartDate = s.Lab.StartDate,
                     EndDate = s.Lab.EndDate,
-                    ProfessorSurname = s.Lab.ProfessorLabs.FirstOrDefault() != null
-                        ? s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Surname
+                    ProfFullName = s.Lab.ProfessorLabs.FirstOrDefault() != null
+                        ? s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Name
+                        + " " + s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Surname
                         : null,
                     Classroom = s.Lab.Classrooms.FirstOrDefault() != null
                         ? s.Lab.Classrooms.FirstOrDefault()!.Name
@@ -140,7 +142,7 @@ namespace BetaUni.Controllers
                 })
                 .ToListAsync();
 
-            if (selectedLabs == null || !selectedLabs.Any())
+            if (selectedLabs == null)
             {
                 return NotFound("Nessun laboratorio selezionato");
             }
@@ -218,6 +220,7 @@ namespace BetaUni.Controllers
 
 public class LabInfos
 {
+    public int Id { get; set; }
     public int LabId { get; set; }
 
     public string Name { get; set; }
@@ -225,7 +228,7 @@ public class LabInfos
     public string Attendance { get; set; }
 
 
-    public string? ProfessorSurname { get; set; }
+    public string? ProfFullName { get; set; }
 
     public string? Classroom { get; set; }
 

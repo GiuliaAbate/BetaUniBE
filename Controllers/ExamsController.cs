@@ -170,9 +170,10 @@ namespace BetaUni.Controllers
                     Cfu = ex.Cfu,
                     Type = ex.Type,
                     CourseId = ex.CourseId,
-                    ProfessorSurname = ex.ProfCourseExams.FirstOrDefault() != null
-                                ? ex.ProfCourseExams.FirstOrDefault()!.Prof.Surname
-                                : null,              
+                    ProfFullName = ex.ProfCourseExams.FirstOrDefault() != null
+                                ? ex.ProfCourseExams.FirstOrDefault()!.Prof.Name 
+                                + " " + ex.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                                : null,
                     Date = ex.Date
                 }).ToListAsync();
 
@@ -190,6 +191,6 @@ public class ExamInfos
     public int Cfu { get; set; }
     public string Type { get; set; }
     public string CourseId { get; set; }
-    public string? ProfessorSurname { get; set; }
+    public string? ProfFullName { get; set; }
     public DateOnly Date { get; set; }
 }

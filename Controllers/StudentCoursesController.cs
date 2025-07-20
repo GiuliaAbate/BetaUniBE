@@ -149,12 +149,14 @@ namespace BetaUni.Controllers
                     .ThenInclude(p => p.Prof)
                 .Select(c => new CourseInfos
                 {
+                    Id = c.Id,
                     CourseId = c.Course.CourseId,
                     Name = c.Course.Name,
                     StartDate = c.Course.StartDate,
                     EndDate = c.Course.EndDate,
-                    ProfessorSurname = c.Course.ProfCourseExams.FirstOrDefault() != null
-                        ? c.Course.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                    ProfFullName = c.Course.ProfCourseExams.FirstOrDefault() != null
+                        ? c.Course.ProfCourseExams.FirstOrDefault()!.Prof.Name 
+                        + " " + c.Course.ProfCourseExams.FirstOrDefault()!.Prof.Surname
                         : null,
                     Classroom = c.Course.Classrooms.FirstOrDefault() != null
                         ? c.Course.Classrooms.FirstOrDefault()!.Name
@@ -187,7 +189,7 @@ namespace BetaUni.Controllers
             }
 
             var course = await _context.Courses.FindAsync(courseId);
-            if(course == null)
+            if (course == null)
             {
                 return NotFound("Corso non trovato");
             }
@@ -242,11 +244,12 @@ namespace BetaUni.Controllers
 
 public class CourseInfos
 {
-    public string CourseId { get; set; } 
+    public int Id { get; set; }
+    public string CourseId { get; set; }
 
     public string Name { get; set; }
 
-    public string? ProfessorSurname { get; set; }
+    public string? ProfFullName { get; set; }
 
     public string? Classroom { get; set; }
 

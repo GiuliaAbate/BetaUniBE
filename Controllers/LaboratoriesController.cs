@@ -84,6 +84,28 @@ namespace BetaUni.Controllers
             return Ok(lab);
         }
 
+        [Authorize]
+        [HttpGet("ProfDepLabs")]
+        public async Task<IActionResult> GetLabsFromProfDep()
+        {
+            var profId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var professor = await _context.Professors
+                .Include(s => s.Department)
+                .Where(s => s.ProfId.Equals(profId))
+                .FirstOrDefaultAsync();
+
+            if (professor == null)
+            {
+                return NotFound("Utente non trovato");
+            }
+
+            var lab = await _context.Laboratories
+                .Where(c => c.DepartmentId.Equals(professor.DepartmentId))
+                .ToListAsync();
+
+            return Ok(lab);
+        }
+
 
         // PUT: api/Laboratories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

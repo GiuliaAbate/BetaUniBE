@@ -191,26 +191,24 @@ namespace BetaUni.Controllers
             }
 
             //Si prendono prima di tutto i corsi controllando id della facoltà
-            var course = await _context.Courses
+            var result = await _context.Courses
                 .Where(c => c.DepartmentId.Equals(professor.DepartmentId))
-                //Si seleziona id e nome del corso, poi ci si collega alla tabella degli Esami
-                .Select(c => new
-                {
-                    CourseID = c.CourseId,
-                    CourseName = c.Name,
-                    //Prendendo gli esami si va a controllare che id del corso sia uguale
-                    Exams = _context.Exams
+                .SelectMany(c => _context.Exams
                     .Where(e => e.CourseId == c.CourseId)
-                    //Si seleziona poi nome dell'esame (uguale a quello del corso), cfu e data
                     .Select(e => new
                     {
+                        CourseId = c.CourseId,
+                        CourseName = c.Name,
+                        StartDate = c.StartDate,
+                        EndDate = c.EndDate,
                         ExamName = e.Name,
                         e.Cfu,
-                        e.Date
-                    }).ToList() //si mette tutto in una lista
-                }).ToListAsync(); //si restituisce risultato completo in modo asincrono
+                        e.Type,
+                        ExamId = e.ExamId
+                    }))
+                .ToListAsync();
 
-            return Ok(course);
+            return Ok(result);
         }
         #endregion
 

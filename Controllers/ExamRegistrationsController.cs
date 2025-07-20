@@ -87,8 +87,9 @@ namespace BetaUni.Controllers
                     Cfu = e.Exam.Cfu,
                     Type = e.Exam.Type,
                     CourseId = e.Exam.CourseId,
-                    ProfessorSurname = e.Exam.ProfCourseExams.FirstOrDefault() != null
-                        ? e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                    ProfFullName = e.Exam.ProfCourseExams.FirstOrDefault() != null
+                        ? e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Name
+                        + " " + e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Surname
                         : null,
                     Date = e.Exam.Date
                 }).ToListAsync();
@@ -124,8 +125,9 @@ namespace BetaUni.Controllers
                     Cfu = e.Exam.Cfu,
                     Type = e.Exam.Type,
                     CourseId = e.Exam.CourseId,
-                    ProfessorSurname = e.Exam.ProfCourseExams.FirstOrDefault() != null
-                        ? e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Surname
+                    ProfFullName = e.Exam.ProfCourseExams.FirstOrDefault() != null
+                        ? e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Name
+                        + " " + e.Exam.ProfCourseExams.FirstOrDefault()!.Prof.Surname
                         : null,
                     Date = e.Exam.Date
                 }).ToListAsync();

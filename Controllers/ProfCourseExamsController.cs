@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -174,10 +175,41 @@ namespace BetaUni.Controllers
 
             return Ok(students);
         }
+
+        [Authorize]
+        [HttpGet("ProfFutureExams")]
+        public async Task<IActionResult> GetProfFutureExams()
+        {
+            var profId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(profId))
+            {
+                return Unauthorized("Utente non autenticato");
+            }
+
+            var exams = await _context.ProfCourseExams
+                .Where(p => p.ProfId == profId)
+                .Include(e => e.Exam)
+                .Select(e => new
+                {
+                    e.Exam.ExamId,
+                    e.Exam.Name,
+                    e.Exam.Cfu,
+                    e.Exam.Type,
+                    e.Exam.Date
+                }).ToListAsync();
+
+            if (exams == null)
+            {
+                return NotFound("Nessun esame selezionato");
+            }
+
+            return Ok(exams);
+        }
         #endregion
 
         #region POST
-        [HttpPost("AddCourseExamProf")]
+        [Authorize]
+        [HttpPost("AddCourseExamProf/{courseId}/{examId}")]
         public async Task<IActionResult> AddExamCourse(string courseId, int examId)
         {
             var profID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -223,6 +255,7 @@ namespace BetaUni.Controllers
 
         #region DELETE
         //Togliere esame e corso scelti
+        [Authorize]
         [HttpDelete("DeleteCourseExam/{id}")]
         public async Task<IActionResult> DeleteCourseRegistration(int id)
         {
