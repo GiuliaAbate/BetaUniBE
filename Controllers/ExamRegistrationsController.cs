@@ -82,6 +82,7 @@ namespace BetaUni.Controllers
                     .ThenInclude(p => p.Prof)
                 .Select(e => new ExamInfos
                 {
+                                        Id = e.Id,
                     ExamId = e.Exam.ExamId,
                     Name = e.Exam.Name,
                     Cfu = e.Exam.Cfu,

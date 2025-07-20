@@ -186,6 +186,7 @@ namespace BetaUni.Controllers
 //classe copia con anche il nome del prof e facoltà
 public class ExamInfos
 {
+    public int Id { get; set; }
     public int ExamId { get; set; }
     public string Name { get; set; }
     public int Cfu { get; set; }
