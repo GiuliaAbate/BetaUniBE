@@ -21,6 +21,17 @@ namespace BetaUni
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
             //Servizio usato che ha metodi vari per controlli
             builder.Services.AddScoped<Services>();
 
@@ -31,17 +42,6 @@ namespace BetaUni
             //Service per ignorare eventuali cicli
             builder.Services.AddControllers().AddJsonOptions(
                 jsOpt => jsOpt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
-            //builder.Services.AddCors(options =>
-            //{
-            //    options.AddPolicy("MyPolicy", policy =>                      
-            //    {
-            //        policy.WithOrigins("http://localhost:4200")
-            //              .AllowAnyHeader()
-            //              .AllowAnyMethod()
-            //              .AllowCredentials();
-            //    });
-            //});
 
             //Si istanzia classe che si userà per JWT
             JWTSettings jwtSettings = new();
@@ -158,12 +158,7 @@ namespace BetaUni
                 app.UseSwaggerUI();
             }
 
-            app.UseCors(builder =>
-                builder.WithOrigins("http://localhost:4200") // Cambia porta se serve
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .AllowCredentials()
-            );
+            app.UseCors("AllowFrontend"); 
 
             app.UseHttpsRedirection();
 
