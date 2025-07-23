@@ -205,6 +205,90 @@ namespace BetaUni.Controllers
 
             return Ok(exams);
         }
+
+        //Metodo per prendere i corsi a cui il prof è iscritto
+        [HttpGet("ProfSelectedCourses")]
+        public async Task<IActionResult> GetProfCourses()
+        {
+            var profID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(profID))
+            {
+                return Unauthorized("Utente non autenticato");
+            }
+
+            var selectedCourses = await _context.ProfCourseExams
+                .Where(p => p.ProfId == profID)
+                .Include(c => c.Course)
+                    .ThenInclude(cl => cl.Classrooms)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.CourseId,
+                    c.ExamId,
+                    CourseName = c.Course.Name,
+                    StartDate = c.Course.StartDate,
+                    EndDate = c.Course.EndDate,
+                    Classrooms = c.Course.Classrooms.FirstOrDefault() != null
+                        ? c.Course.Classrooms.FirstOrDefault()!.Name
+                        : null
+                }).ToListAsync();
+
+            if (selectedCourses == null)
+            {
+                return NotFound("Nessun corso selezionato");
+            }
+
+            return Ok(selectedCourses);
+        }
+
+
+        //Metodo per prendere i corsi a cui il prof è iscritto
+        [HttpGet("ProfSelectedExams")]
+        public async Task<IActionResult> GetProfExams()
+        {
+            var profID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(profID))
+            {
+                return Unauthorized("Utente non autenticato");
+            }
+
+            var selectedCourses = await _context.ProfCourseExams
+                .Where(p => p.ProfId == profID)
+                .Include(c => c.Exam)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.CourseId,
+                    c.ExamId,
+                    ExamName = c.Exam.Name,
+                    CFU = c.Exam.Cfu,
+                    Type = c.Exam.Type,
+                    Date = c.Exam.Date
+                }).ToListAsync();
+
+            if (selectedCourses == null)
+            {
+                return NotFound("Nessun corso selezionato");
+            }
+
+            return Ok(selectedCourses);
+        }
+
+        [HttpGet("ProfessorCourseExams")]
+        public async Task<IActionResult> GetProfessorCourseExams()
+        {
+            var profID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(profID))
+            {
+                return Unauthorized("Utente non autenticato");
+            }
+
+            var courses = await _context.ProfCourseExams
+                .Where(e => e.ProfId == profID)
+                .ToListAsync();
+
+            return Ok(courses);
+        }
         #endregion
 
         #region POST

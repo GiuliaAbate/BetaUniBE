@@ -105,6 +105,43 @@ namespace BetaUni.Controllers
             return _context.ProfessorLabs.Any(e => e.Id == id);
         }
 
+        #region GET 
+        //Metodo per prendere i laboratori a cui il prof è iscritto
+        [HttpGet("ProfSelectedLabs")]
+        public async Task<IActionResult> GetProfLabs()
+        {
+            var profID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(profID))
+            {
+                return Unauthorized("Utente non autenticato");
+            }
+
+            var selectedCourses = await _context.ProfessorLabs
+                .Where(p => p.ProfId == profID)
+                .Include(l => l.Lab)
+                    .ThenInclude(cl => cl.Classrooms)
+                .Select(l => new
+                {
+                    l.Id,
+                    LabId = l.Lab.LabId,
+                    Name = l.Lab.Name,
+                    Attendance = l.Lab.Attendance,
+                    StartDate = l.Lab.StartDate,
+                    EndDate = l.Lab.EndDate,
+                    Classrooms = l.Lab.Classrooms.FirstOrDefault() != null
+                        ? l.Lab.Classrooms.FirstOrDefault()!.Name
+                        : null
+                }).ToListAsync();
+
+            if (selectedCourses == null)
+            {
+                return NotFound("Nessun corso selezionato");
+            }
+
+            return Ok(selectedCourses);
+        }
+        #endregion
+
         #region POST
         //Metodo per permettere al prof di scegliere un laboratorio
         [HttpPost("ProfAddLab/{labId}")]
