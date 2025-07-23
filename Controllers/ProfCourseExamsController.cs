@@ -147,7 +147,14 @@ namespace BetaUni.Controllers
             var students = await _context.ExamRegistrations
                 .Where(sc => sc.ExamId == profCourseExam.ExamId)
                 .Include(sc => sc.Stud)
-                .Select(sc => sc.Stud)
+                .Select(sc => new
+                {
+                    StudId= sc.Stud.StudId,
+                    Name = sc.Stud.Name,
+                    Surname = sc.Stud.Surname,
+                    Email = sc.Stud.Email,
+                    RegistrationDate = sc.RegistrationDate
+                })
                 .ToListAsync();
 
             return Ok(students);
