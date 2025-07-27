@@ -137,7 +137,21 @@ namespace BetaUni.Controllers
                 return Unauthorized("Utente non autenticato");
             }
 
-            var professor = await _context.Professors.FindAsync(profID);
+            var professor = await _context.Professors
+                .Include(pd => pd.Department)
+                .Where(p => p.ProfId == profID)
+                .Select(p => new
+                {
+                    p.ProfId,
+                    p.Name,
+                    p.Surname,
+                    p.BirthDate,
+                    p.Email,
+                    p.PhoneNumber,
+                    p.DepartmentId,
+                    p.EnrollmentDate,
+                    DepartmentName = p.Department.Name
+                }).FirstOrDefaultAsync();
 
             return Ok(professor);
         }

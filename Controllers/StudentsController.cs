@@ -26,84 +26,6 @@ namespace BetaUni.Controllers
             _services = services;
         }
 
-
-        // PUT: api/Students/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudent(string id, Student student)
-        {
-            if (id != student.StudId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(student).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Students
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Student>> PostStudent(Student student)
-        {
-            _context.Students.Add(student);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (StudentExists(student.StudId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetStudent", new { id = student.StudId }, student);
-        }
-
-        // DELETE: api/Students/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStudent(string id)
-        {
-            var student = await _context.Students.FindAsync(id);
-            if (student == null)
-            {
-                return NotFound();
-            }
-
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool StudentExists(string id)
-        {
-            return _context.Students.Any(e => e.StudId == id);
-        }
-
         #region GET
         // GET: api/Students
         [HttpGet]
@@ -138,9 +60,22 @@ namespace BetaUni.Controllers
                 return Unauthorized("Utente non autenticato");
             }
 
-            Console.WriteLine($"Token valido. ID utente: {studID}");
-
-            var student = await _context.Students.FindAsync(studID);
+            var student = await _context.Students
+                .Include(sd => sd.Department)
+                .Where(s => s.StudId == studID)
+                .Select(s => new
+                {
+                    s.StudId,
+                    s.Name,
+                    s.Surname,
+                    s.BirthDate,
+                    s.Email,
+                    s.PhoneNumber,
+                    s.DepartmentId,
+                    s.EnrollmentDate,
+                    DepartmentName = s.Department.Name
+                }).FirstOrDefaultAsync();
+                
 
             return Ok(student);
         }
@@ -229,6 +164,14 @@ namespace BetaUni.Controllers
         }
 
         #endregion
+
+
+        private bool StudentExists(string id)
+        {
+            return _context.Students.Any(e => e.StudId == id);
+        }
+
+
     }
 }
 
