@@ -102,13 +102,21 @@ namespace BetaUni.Controllers
 
                 if (prof == null)
                 {
-                    return Unauthorized("Email o password non validi");
+                    return Unauthorized(new
+                    {
+                        field = "Email",
+                        message = "Email errata"
+                    });
                 }
 
                 //Si usa il metodo per verificare la password
                 if (!Services.VerifyPassword(login.Password, prof.Password, prof.Salt))
                 {
-                    return Unauthorized("Email o password non validi");
+                    return Unauthorized(new
+                    {
+                        field = "Password",
+                        message = "Password errata"
+                    });
                 }
 
                 var token = GenerateProfessorToken(prof.ProfId, prof.Email);
@@ -130,12 +138,20 @@ namespace BetaUni.Controllers
 
                 if (stud == null)
                 {
-                    return Unauthorized("Email o password non validi");
+                    return Unauthorized(new
+                    {
+                        field = "Email",
+                        message = "Email errata"
+                    });
                 }
 
                 if (!Services.VerifyPassword(login.Password, stud.Password, stud.Salt))
                 {
-                    return Unauthorized("Email o password non validi");
+                    return Unauthorized(new
+                    {
+                        field = "Password",
+                        message = "Password errata"
+                    });
                 }
 
                 var token = GenerateStudentToken(stud.StudId, stud.Email);
@@ -152,7 +168,7 @@ namespace BetaUni.Controllers
         public IActionResult IsLogged() //non si mette async perchè non si fa chiamata a DB
         {
             //Si verifica che l'utente sia già autenticato
-            if(User.Identity != null && User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 //Si prendono id e ruolo dai claim types
                 var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -167,11 +183,12 @@ namespace BetaUni.Controllers
                 };
 
                 return Ok(authenticated);
-            } else
+            }
+            else
             {
                 return Unauthorized();
             }
-        } 
+        }
 
 
         //Metodo per prendere id da token
