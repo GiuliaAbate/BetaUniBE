@@ -237,6 +237,7 @@ namespace BetaUni.Controllers
                     EndDate = c.Course.EndDate,
                     Classrooms = c.Course.Classrooms.FirstOrDefault() != null
                         ? c.Course.Classrooms.FirstOrDefault()!.Name
+                        + " " + c.Course.Classrooms.FirstOrDefault()!.Number
                         : null
                 }).ToListAsync();
 

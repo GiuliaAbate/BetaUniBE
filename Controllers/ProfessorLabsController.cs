@@ -116,7 +116,7 @@ namespace BetaUni.Controllers
                 return Unauthorized("Utente non autenticato");
             }
 
-            var selectedCourses = await _context.ProfessorLabs
+            var selectedLabs = await _context.ProfessorLabs
                 .Where(p => p.ProfId == profID)
                 .Include(l => l.Lab)
                     .ThenInclude(cl => cl.Classrooms)
@@ -130,15 +130,16 @@ namespace BetaUni.Controllers
                     EndDate = l.Lab.EndDate,
                     Classrooms = l.Lab.Classrooms.FirstOrDefault() != null
                         ? l.Lab.Classrooms.FirstOrDefault()!.Name
+                        + " " + l.Lab.Classrooms.FirstOrDefault()!.Number
                         : null
                 }).ToListAsync();
 
-            if (selectedCourses == null)
+            if (selectedLabs == null)
             {
                 return NotFound("Nessun corso selezionato");
             }
 
-            return Ok(selectedCourses);
+            return Ok(selectedLabs);
         }
         #endregion
 

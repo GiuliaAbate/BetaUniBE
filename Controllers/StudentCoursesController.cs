@@ -109,28 +109,6 @@ namespace BetaUni.Controllers
         }
 
         //Metodo in cui si vanno a prendere tutti i corsi aggiunti da uno studente
-        //[HttpGet("CoursesByStudent")]
-        //public async Task<ActionResult<StudentCourse>> GetSelectedCourses()
-        //{
-        //    var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    if (string.IsNullOrEmpty(studID))
-        //    {
-        //        return Unauthorized("Utente non autenticato");
-        //    }
-
-        //    var selectedCourses = await _context.StudentCourses
-        //        .Where(s => s.StudId == studID).ToListAsync();
-
-        //    if(selectedCourses == null)
-        //    {
-        //        return NotFound("Nessun corso selezionato");
-        //    }
-
-        //    return Ok(selectedCourses);
-
-        //}
-
-        //v2
         [HttpGet("CoursesByStudent")]
         public async Task<ActionResult<IEnumerable<CourseInfos>>> GetSelectedCourses()
         {
@@ -158,8 +136,9 @@ namespace BetaUni.Controllers
                         ? c.Course.ProfCourseExams.FirstOrDefault()!.Prof.Name 
                         + " " + c.Course.ProfCourseExams.FirstOrDefault()!.Prof.Surname
                         : null,
-                    Classroom = c.Course.Classrooms.FirstOrDefault() != null
+                    Classrooms = c.Course.Classrooms.FirstOrDefault() != null
                         ? c.Course.Classrooms.FirstOrDefault()!.Name
+                        + " " + c.Course.Classrooms.FirstOrDefault()!.Number
                         : null
                 }).ToListAsync();
 
@@ -251,7 +230,7 @@ public class CourseInfos
 
     public string? ProfFullName { get; set; }
 
-    public string? Classroom { get; set; }
+    public string? Classrooms { get; set; }
 
     public DateOnly StartDate { get; set; }
 

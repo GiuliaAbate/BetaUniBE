@@ -136,8 +136,9 @@ namespace BetaUni.Controllers
                         ? s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Name
                         + " " + s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Surname
                         : null,
-                    Classroom = s.Lab.Classrooms.FirstOrDefault() != null
+                    Classrooms = s.Lab.Classrooms.FirstOrDefault() != null
                         ? s.Lab.Classrooms.FirstOrDefault()!.Name
+                        + " " + s.Lab.Classrooms.FirstOrDefault()!.Number
                         : null
                 })
                 .ToListAsync();
@@ -230,7 +231,7 @@ public class LabInfos
 
     public string? ProfFullName { get; set; }
 
-    public string? Classroom { get; set; }
+    public string? Classrooms { get; set; }
 
 
     public DateOnly StartDate { get; set; }
