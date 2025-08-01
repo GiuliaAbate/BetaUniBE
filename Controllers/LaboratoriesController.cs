@@ -22,6 +22,7 @@ namespace BetaUni.Controllers
             _context = context;
         }
 
+        #region GET
         // GET: api/Laboratories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Laboratory>>> GetLaboratories()
@@ -43,6 +44,7 @@ namespace BetaUni.Controllers
             return laboratory;
         }
 
+        //Chiamata che prende i laboratori in base alla facoltà
         [HttpGet("GetLabsByDep/{depID}")]
         public async Task<IActionResult> GetLabsByDep(string depID)
         {
@@ -62,7 +64,8 @@ namespace BetaUni.Controllers
             return Ok(laboratory);
         }
 
-        [Authorize]
+        //Chiamata per prendere i laboratori guardando la facoltà dello studente
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("DepLabs")]
         public async Task<IActionResult> GetLabsFromDepartment()
         {
@@ -84,7 +87,8 @@ namespace BetaUni.Controllers
             return Ok(lab);
         }
 
-        [Authorize]
+        //Chiamata per prendere i laboratori guardando la facoltà del professore
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfDepLabs")]
         public async Task<IActionResult> GetLabsFromProfDep()
         {
@@ -105,8 +109,22 @@ namespace BetaUni.Controllers
 
             return Ok(lab);
         }
+        #endregion
 
+        #region POST
+        // POST: api/Laboratories
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Laboratory>> PostLaboratory(Laboratory laboratory)
+        {
+            _context.Laboratories.Add(laboratory);
+            await _context.SaveChangesAsync();
 
+            return CreatedAtAction("GetLaboratory", new { id = laboratory.LabId }, laboratory);
+        }
+        #endregion
+
+        #region PUT
         // PUT: api/Laboratories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -137,18 +155,9 @@ namespace BetaUni.Controllers
 
             return NoContent();
         }
+        #endregion
 
-        // POST: api/Laboratories
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Laboratory>> PostLaboratory(Laboratory laboratory)
-        {
-            _context.Laboratories.Add(laboratory);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetLaboratory", new { id = laboratory.LabId }, laboratory);
-        }
-
+        #region DELETE
         // DELETE: api/Laboratories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLaboratory(int id)
@@ -164,6 +173,7 @@ namespace BetaUni.Controllers
 
             return NoContent();
         }
+        #endregion
 
         private bool LaboratoryExists(int id)
         {

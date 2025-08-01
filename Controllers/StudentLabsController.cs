@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,70 +20,6 @@ namespace BetaUni.Controllers
         public StudentLabsController(IubContext context)
         {
             _context = context;
-        }
-
-
-        // PUT: api/StudentLabs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudentLab(int id, StudentLab studentLab)
-        {
-            if (id != studentLab.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(studentLab).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentLabExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/StudentLabs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<StudentLab>> PostStudentLab(StudentLab studentLab)
-        {
-            _context.StudentLabs.Add(studentLab);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetStudentLab", new { id = studentLab.Id }, studentLab);
-        }
-
-        // DELETE: api/StudentLabs/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStudentLab(int id)
-        {
-            var studentLab = await _context.StudentLabs.FindAsync(id);
-            if (studentLab == null)
-            {
-                return NotFound();
-            }
-
-            _context.StudentLabs.Remove(studentLab);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool StudentLabExists(int id)
-        {
-            return _context.StudentLabs.Any(e => e.Id == id);
         }
 
         #region GET
@@ -107,7 +44,8 @@ namespace BetaUni.Controllers
             return studentLab;
         }
 
-        //Metodo in cui si vanno a prendere tutti i laboratori aggiunti da uno studente
+        //Chiamata in cui si vanno a prendere tutti i laboratori aggiunti da uno studente
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("LabsByStudent")]
         public async Task<ActionResult<IEnumerable<LabInfos>>> GetSelectedLabs()
         {
@@ -117,11 +55,15 @@ namespace BetaUni.Controllers
                 return Unauthorized("Utente non autenticato");
             }
 
+            //Si prendono le registrazioni degli studenti ai laboratori 
             var selectedLabs = await _context.StudentLabs
+                //Si controlla id studente
                 .Where(s => s.StudId == studID)
+                //Si includono informazioni del laboratorio e la classe
                 .Include(s => s.Lab)
                     .ThenInclude(l => l.Classrooms)
                 .Include(s => s.Lab)
+                //Poi si includono le registrazioni dei professori ai laboratori e quindi informazioni del prof
                     .ThenInclude(l => l.ProfessorLabs)
                         .ThenInclude(pl => pl.Prof)
                 .Select(s => new LabInfos
@@ -132,10 +74,12 @@ namespace BetaUni.Controllers
                     Attendance = s.Lab.Attendance,
                     StartDate = s.Lab.StartDate,
                     EndDate = s.Lab.EndDate,
+                    //Si prende nome completo del prof
                     ProfFullName = s.Lab.ProfessorLabs.FirstOrDefault() != null
                         ? s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Name
                         + " " + s.Lab.ProfessorLabs.FirstOrDefault()!.Prof.Surname
                         : null,
+                    //Si prende nome e numero dell'aula
                     Classrooms = s.Lab.Classrooms.FirstOrDefault() != null
                         ? s.Lab.Classrooms.FirstOrDefault()!.Name
                         + " " + s.Lab.Classrooms.FirstOrDefault()!.Number
@@ -151,11 +95,12 @@ namespace BetaUni.Controllers
             return Ok(selectedLabs);
         }
 
-      
+
         #endregion
 
         #region POST
         //Metodo per permettere all'utente di iscriversi ad un laboratorio
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpPost("LabRegistration/{labId}")]
         public async Task<IActionResult> AddLabToStudyPlan(int labId)
         {
@@ -195,6 +140,7 @@ namespace BetaUni.Controllers
 
         #region DELETE
         //Disiscriversi da un laboratorio
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpDelete("LabUnsubscribe/{regId}")]
         public async Task<IActionResult> DeleteLabRegistration(int regId)
         {
@@ -216,6 +162,11 @@ namespace BetaUni.Controllers
             return NoContent();
         }
         #endregion
+
+        private bool StudentLabExists(int id)
+        {
+            return _context.StudentLabs.Any(e => e.Id == id);
+        }
     }
 }
 
@@ -223,17 +174,10 @@ public class LabInfos
 {
     public int Id { get; set; }
     public int LabId { get; set; }
-
     public string Name { get; set; }
-
     public string Attendance { get; set; }
-
-
     public string? ProfFullName { get; set; }
-
     public string? Classrooms { get; set; }
-
-
     public DateOnly StartDate { get; set; }
 
     public DateOnly EndDate { get; set; }

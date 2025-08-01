@@ -22,6 +22,7 @@ namespace BetaUni.Controllers
             _jwtSettings = jwtSettings;
         }
 
+        //Metodo per generare i token quando professore fa login
         private string GenerateProfessorToken(string profID, string email)
         {
             try
@@ -59,6 +60,7 @@ namespace BetaUni.Controllers
             }
         }
 
+        //Metodo per generare i token quando studente fa login
         private string GenerateStudentToken(string studID, string email)
         {
             try
@@ -92,6 +94,7 @@ namespace BetaUni.Controllers
             }
         }
 
+        //Chiamata per permettere al professore di fare il login
         [HttpPost("ProfLogin")]
         public async Task<IActionResult> ProfessorLogin([FromBody] Login login, [FromServices] IubContext context)
         {
@@ -128,6 +131,7 @@ namespace BetaUni.Controllers
             }
         }
 
+        //Chiamata per permettere allo studente  di fare il login
         [HttpPost("StudLogin")]
         public async Task<IActionResult> StudentLogin([FromBody] Login login, [FromServices] IubContext context)
         {
@@ -156,54 +160,6 @@ namespace BetaUni.Controllers
 
                 var token = GenerateStudentToken(stud.StudId, stud.Email);
                 return Ok(new { token });
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        //Metodo per capire se l'utente è autenticato o meno
-        [HttpGet("IsUserLogged")]
-        public IActionResult IsLogged() //non si mette async perchè non si fa chiamata a DB
-        {
-            //Si verifica che l'utente sia già autenticato
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                //Si prendono id e ruolo dai claim types
-                var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
-                //Si indica che utente è autenticato
-                var authenticated = new
-                {
-                    authenticated = true,
-                    userID,
-                    role
-                };
-
-                return Ok(authenticated);
-            }
-            else
-            {
-                return Unauthorized();
-            }
-        }
-
-
-        //Metodo per prendere id da token
-        public static string? GetIDFromToken(string token)
-        {
-            try
-            {
-                //Si crea nuovo handler
-                var handler = new JwtSecurityTokenHandler();
-
-                //Si legge il token passato
-                var jwt = handler.ReadJwtToken(token);
-                //Si cerca subject tra i claims di jwt e si va a prendere il valore
-                var userID = jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Sub)?.Value;
-                return userID;
             }
             catch (Exception ex)
             {

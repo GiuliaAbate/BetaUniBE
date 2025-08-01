@@ -22,6 +22,12 @@ namespace BetaUni.Controllers
             _context = context;
         }
 
+        private bool ProfCourseExamExists(int id)
+        {
+            return _context.ProfCourseExams.Any(e => e.Id == id);
+        }
+
+        #region GET
         // GET: api/ProfCourseExams
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProfCourseExam>>> GetProfCourseExams()
@@ -43,71 +49,8 @@ namespace BetaUni.Controllers
             return profCourseExam;
         }
 
-        // PUT: api/ProfCourseExams/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProfCourseExam(int id, ProfCourseExam profCourseExam)
-        {
-            if (id != profCourseExam.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(profCourseExam).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProfCourseExamExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/ProfCourseExams
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<ProfCourseExam>> PostProfCourseExam(ProfCourseExam profCourseExam)
-        {
-            _context.ProfCourseExams.Add(profCourseExam);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProfCourseExam", new { id = profCourseExam.Id }, profCourseExam);
-        }
-
-        // DELETE: api/ProfCourseExams/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProfCourseExam(int id)
-        {
-            var profCourseExam = await _context.ProfCourseExams.FindAsync(id);
-            if (profCourseExam == null)
-            {
-                return NotFound();
-            }
-
-            _context.ProfCourseExams.Remove(profCourseExam);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ProfCourseExamExists(int id)
-        {
-            return _context.ProfCourseExams.Any(e => e.Id == id);
-        }
-
-        #region GET
-        //Metodo per far sì che il professore possa vedere gli studenti iscritti al suo corso/esame
+        //Metodo per far sì che il professore possa vedere gli studenti iscritti al suo corso
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("StudentByCourse/{id}")]
         public async Task<IActionResult> GetStudentsByCourse(int id)
         {
@@ -131,6 +74,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo per far sì che il professore possa vedere gli studenti iscritti al suo esame
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("StudentsByExam/{id}")]
         public async Task<IActionResult> GetStudentsByExam(int id)
         {
@@ -149,11 +93,11 @@ namespace BetaUni.Controllers
                 .Include(sc => sc.Stud)
                 .Select(sc => new
                 {
-                    StudId= sc.Stud.StudId,
-                    Name = sc.Stud.Name,
-                    Surname = sc.Stud.Surname,
-                    Email = sc.Stud.Email,
-                    RegistrationDate = sc.RegistrationDate
+                    sc.Stud.StudId,
+                    sc.Stud.Name,
+                    sc.Stud.Surname,
+                    sc.Stud.Email,
+                    sc.RegistrationDate
                 })
                 .ToListAsync();
 
@@ -161,6 +105,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo per far sì che il professore possa vedere gli studenti iscritti al suo laboratorio
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("StudentsByLab/{id}")]
         public async Task<IActionResult> GetStudentsByLab(int id)
         {
@@ -183,7 +128,8 @@ namespace BetaUni.Controllers
             return Ok(students);
         }
 
-        [Authorize]
+        //Metodo per far sì che il professore possa vedere i suoi esami futuri di cui è professore
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfFutureExams")]
         public async Task<IActionResult> GetProfFutureExams()
         {
@@ -213,7 +159,8 @@ namespace BetaUni.Controllers
             return Ok(exams);
         }
 
-        //Metodo per prendere i corsi a cui il prof è iscritto
+        //Metodo per prendere i corsi che il professore ha scelto
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfSelectedCourses")]
         public async Task<IActionResult> GetProfCourses()
         {
@@ -232,9 +179,9 @@ namespace BetaUni.Controllers
                     c.Id,
                     c.CourseId,
                     c.ExamId,
-                    CourseName = c.Course.Name,
-                    StartDate = c.Course.StartDate,
-                    EndDate = c.Course.EndDate,
+                    c.Course.Name,
+                    c.Course.StartDate,
+                    c.Course.EndDate,
                     Classrooms = c.Course.Classrooms.FirstOrDefault() != null
                         ? c.Course.Classrooms.FirstOrDefault()!.Name
                         + " " + c.Course.Classrooms.FirstOrDefault()!.Number
@@ -250,7 +197,8 @@ namespace BetaUni.Controllers
         }
 
 
-        //Metodo per prendere i corsi a cui il prof è iscritto
+        //Metodo per prendere gli esami a cui il prof è iscritto
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfSelectedExams")]
         public async Task<IActionResult> GetProfExams()
         {
@@ -268,10 +216,10 @@ namespace BetaUni.Controllers
                     c.Id,
                     c.CourseId,
                     c.ExamId,
-                    ExamName = c.Exam.Name,
-                    CFU = c.Exam.Cfu,
-                    Type = c.Exam.Type,
-                    Date = c.Exam.Date
+                    c.Exam.Name,
+                    c.Exam.Cfu,
+                    c.Exam.Type,
+                    c.Exam.Date
                 }).ToListAsync();
 
             if (selectedCourses == null)
@@ -282,6 +230,8 @@ namespace BetaUni.Controllers
             return Ok(selectedCourses);
         }
 
+        //Metodo per prendere le registrazioni del professore al corso/esame
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfessorCourseExams")]
         public async Task<IActionResult> GetProfessorCourseExams()
         {
@@ -300,7 +250,8 @@ namespace BetaUni.Controllers
         #endregion
 
         #region POST
-        [Authorize]
+        //Metodo per permettere al professore di aggiungere al suo piano didattico il corso (ed esame insieme)
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpPost("AddCourseExamProf/{courseId}/{examId}")]
         public async Task<IActionResult> AddExamCourse(string courseId, int examId)
         {
@@ -346,8 +297,8 @@ namespace BetaUni.Controllers
         #endregion
 
         #region DELETE
-        //Togliere esame e corso scelti
-        [Authorize]
+        //Disiscrizione dal corso ed esame scelti
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpDelete("DeleteCourseExam/{id}")]
         public async Task<IActionResult> DeleteCourseRegistration(int id)
         {

@@ -45,27 +45,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo in cui si vanno a prendere tutti gli esami a cui lo studente è iscritto
-        //[HttpGet("ExamsByStudent")]
-        //public async Task<ActionResult<ExamRegistration>> GetSelectedExams()
-        //{
-        //    var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    if (string.IsNullOrEmpty(studID))
-        //    {
-        //        return Unauthorized("Utente non autenticato");
-        //    }
-
-        //    var selectedExams = await _context.ExamRegistrations
-        //        .Where(s => s.StudId == studID).ToListAsync();
-
-        //    if (selectedExams == null)
-        //    {
-        //        return NotFound("Nessun esame selezionato");
-        //    }
-
-        //    return Ok(selectedExams);
-        //}
-
-        //v2
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("ExamsByStudent")]
         public async Task<ActionResult<IEnumerable<ExamInfos>>> GetSelectedExams()
         {
@@ -82,7 +62,7 @@ namespace BetaUni.Controllers
                     .ThenInclude(p => p.Prof)
                 .Select(e => new ExamInfos
                 {
-                                        Id = e.Id,
+                    Id = e.Id,
                     ExamId = e.Exam.ExamId,
                     Name = e.Exam.Name,
                     Cfu = e.Exam.Cfu,
@@ -104,7 +84,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo per prendere esami in programma (futuri) di uno studente
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("FutureExams")]
         public async Task<ActionResult<IEnumerable<ExamInfos>>> GetFutureExams()
         {
@@ -144,6 +124,7 @@ namespace BetaUni.Controllers
 
         #region POST
         //Metodo per permettere allo studente di iscriversi ad un esame
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpPost("Registration/{examId}")]
         public async Task<IActionResult> RegisterToExam(int examId)
         {
@@ -161,6 +142,7 @@ namespace BetaUni.Controllers
 
             bool alreadyRegistered = await _context.ExamRegistrations
                 .AnyAsync(s => s.StudId.Equals(studID) && s.CourseId.Equals(examId));
+
             if (alreadyRegistered)
             {
                 return BadRequest("Iscrizione all'esame già avvenuta");
@@ -181,18 +163,6 @@ namespace BetaUni.Controllers
             return Ok(chosenExam);
 
         }
-
-        // POST: api/ExamRegistrations
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<ExamRegistration>> PostExamRegistration(ExamRegistration examRegistration)
-        {
-            _context.ExamRegistrations.Add(examRegistration);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetExamRegistration", new { id = examRegistration.Id }, examRegistration);
-        }
-
         #endregion
 
         #region PUT
@@ -230,6 +200,7 @@ namespace BetaUni.Controllers
 
         #region DELETE
         //Disiscriversi da un esame
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpDelete("ExamUnsubscribe/{regId}")]
         public async Task<IActionResult> DeleteExamRegistration(int regId)
         {
@@ -240,22 +211,6 @@ namespace BetaUni.Controllers
             }
 
             var examRegistration = await _context.ExamRegistrations.FindAsync(regId);
-            if (examRegistration == null)
-            {
-                return NotFound();
-            }
-
-            _context.ExamRegistrations.Remove(examRegistration);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        // DELETE: api/ExamRegistrations/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRegistration(int id)
-        {
-            var examRegistration = await _context.ExamRegistrations.FindAsync(id);
             if (examRegistration == null)
             {
                 return NotFound();

@@ -49,17 +49,20 @@ namespace BetaUni.Controllers
             return student;
         }
 
-        //Metodo con la quale lo studente potrà vedere i suoi dati, quindi si prende il token per capire chi è l'utente
+        //Metodo con la quale lo studente potrà vedere i suoi dati,
+        //quindi si prende il token per capire chi è l'utente
         [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("ViewStudentInfo")]
         public async Task<IActionResult> GetStudentInfo()
         {
+            //Si trova utente se questo è connesso con i Claims
             var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(studID))
             {
                 return Unauthorized("Utente non autenticato");
             }
 
+            //Nella variabile si vanno a prendere tutte le info necessarie
             var student = await _context.Students
                 .Include(sd => sd.Department)
                 .Where(s => s.StudId == studID)
@@ -100,6 +103,7 @@ namespace BetaUni.Controllers
                 }
                 else
                 {
+                    //Nella variabile si memorizza la criptazione della password dello studente
                     var encrypted = Services.SaltEncryption(student.Password);
                     Student stud = new Student
                     {
@@ -108,8 +112,8 @@ namespace BetaUni.Controllers
                         Surname = student.Surname,
                         BirthDate = student.BirthDate,
                         Email = student.Email,
-                        Password = encrypted.Key,
-                        Salt = encrypted.Value,
+                        Password = encrypted.Key, //qui si memorizza solo la password criptata in hash256
+                        Salt = encrypted.Value, //qui si memorizza il salt
                         PhoneNumber = student.PhoneNumber,
                         DepartmentId = student.DepartmentId,
                         EnrollmentDate = DateOnly.FromDateTime(DateTime.Now)
@@ -130,21 +134,24 @@ namespace BetaUni.Controllers
         #endregion
 
         #region PUT
+        //Chiamata per permettere allo studente di aggiornare numero di telefono o password
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpPut("UpdateStudent")]
         public async Task<IActionResult> UpdateStudInfos(StudInfos studInfos)
         {
             var studID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(studID))
             {
-                return Unauthorized("Utente non autenticato");
+                return Unauthorized("Studente non autenticato");
             }
 
             var existingStudent = await _context.Students.FindAsync(studID);
             if (existingStudent == null)
             {
-                return NotFound();
+                return NotFound("Studente non trovato");
             }
 
+            //Si controlla che si sia inserito il numero di telefono e che sia diverso da quello precedente
             if (!string.IsNullOrEmpty(studInfos.PhoneNumber) &&
                 studInfos.PhoneNumber != existingStudent.PhoneNumber)
             {
@@ -175,12 +182,14 @@ namespace BetaUni.Controllers
     }
 }
 
+//Classe che contiene sono i dati che si possono cambiare
 public class StudInfos
 {
     public string? PhoneNumber { get; set; }
     public string? Password { get; set; }
 }
 
+//Classe che contiene i dati richiesti per la registrazione
 public class StudentRegistration
 {
     [Required]

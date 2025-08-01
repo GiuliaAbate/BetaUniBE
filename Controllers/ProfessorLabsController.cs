@@ -1,4 +1,5 @@
 ﻿using BetaUni.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace BetaUni.Controllers
             _context = context;
         }
 
+        #region GET 
         // GET: api/ProfessorLabs
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProfessorLab>>> GetProfessorLabs()
@@ -42,71 +44,8 @@ namespace BetaUni.Controllers
             return professorLab;
         }
 
-        // PUT: api/ProfessorLabs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProfessorLab(int id, ProfessorLab professorLab)
-        {
-            if (id != professorLab.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(professorLab).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProfessorLabExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/ProfessorLabs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<ProfessorLab>> PostProfessorLab(ProfessorLab professorLab)
-        {
-            _context.ProfessorLabs.Add(professorLab);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProfessorLab", new { id = professorLab.Id }, professorLab);
-        }
-
-        // DELETE: api/ProfessorLabs/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProfessorLab(int id)
-        {
-            var professorLab = await _context.ProfessorLabs.FindAsync(id);
-            if (professorLab == null)
-            {
-                return NotFound();
-            }
-
-            _context.ProfessorLabs.Remove(professorLab);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ProfessorLabExists(int id)
-        {
-            return _context.ProfessorLabs.Any(e => e.Id == id);
-        }
-
-        #region GET 
         //Metodo per prendere i laboratori a cui il prof è iscritto
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfSelectedLabs")]
         public async Task<IActionResult> GetProfLabs()
         {
@@ -123,11 +62,11 @@ namespace BetaUni.Controllers
                 .Select(l => new
                 {
                     l.Id,
-                    LabId = l.Lab.LabId,
-                    Name = l.Lab.Name,
-                    Attendance = l.Lab.Attendance,
-                    StartDate = l.Lab.StartDate,
-                    EndDate = l.Lab.EndDate,
+                    l.LabId,
+                    l.Lab.Name,
+                    l.Lab.Attendance,
+                    l.Lab.StartDate,
+                    l.Lab.EndDate,
                     Classrooms = l.Lab.Classrooms.FirstOrDefault() != null
                         ? l.Lab.Classrooms.FirstOrDefault()!.Name
                         + " " + l.Lab.Classrooms.FirstOrDefault()!.Number
@@ -145,6 +84,7 @@ namespace BetaUni.Controllers
 
         #region POST
         //Metodo per permettere al prof di scegliere un laboratorio
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpPost("ProfAddLab/{labId}")]
         public async Task<IActionResult> AddLab(int labId)
         {
@@ -162,6 +102,7 @@ namespace BetaUni.Controllers
 
             bool alreadyRegistered = await _context.ProfessorLabs
                 .AnyAsync(p => p.ProfId.Equals(profID) && p.LabId == labId);
+
             if (alreadyRegistered)
             {
                 return BadRequest("Laboratorio già scelto");
@@ -182,7 +123,8 @@ namespace BetaUni.Controllers
         #endregion
 
         #region DELETE
-        //Rimuovere da un laboratorio
+        //Chiamata per permettere al professore di disiscriversi da un laboratorio
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpDelete("DeleteLab/{id}")]
         public async Task<IActionResult> DeleteLabRegistration(int id)
         {
@@ -203,7 +145,11 @@ namespace BetaUni.Controllers
 
             return NoContent();
         }
-
         #endregion
+
+        private bool ProfessorLabExists(int id)
+        {
+            return _context.ProfessorLabs.Any(e => e.Id == id);
+        }
     }
 }

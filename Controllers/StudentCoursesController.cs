@@ -22,69 +22,6 @@ namespace BetaUni.Controllers
             _context = context;
         }
 
-        // PUT: api/StudentCourses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudentCourse(int id, StudentCourse studentCourse)
-        {
-            if (id != studentCourse.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(studentCourse).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentCourseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/StudentCourses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<StudentCourse>> PostStudentCourse(StudentCourse studentCourse)
-        {
-            _context.StudentCourses.Add(studentCourse);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetStudentCourse", new { id = studentCourse.Id }, studentCourse);
-        }
-
-        // DELETE: api/StudentCourses/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStudentCourse(int id)
-        {
-            var studentCourse = await _context.StudentCourses.FindAsync(id);
-            if (studentCourse == null)
-            {
-                return NotFound();
-            }
-
-            _context.StudentCourses.Remove(studentCourse);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool StudentCourseExists(int id)
-        {
-            return _context.StudentCourses.Any(e => e.Id == id);
-        }
-
         #region GET
 
         // GET: api/StudentCourses --> si vedono tutte le iscrizioni ai corsi, di tutte le facoltà e studenti
@@ -109,6 +46,7 @@ namespace BetaUni.Controllers
         }
 
         //Metodo in cui si vanno a prendere tutti i corsi aggiunti da uno studente
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("CoursesByStudent")]
         public async Task<ActionResult<IEnumerable<CourseInfos>>> GetSelectedCourses()
         {
@@ -154,10 +92,8 @@ namespace BetaUni.Controllers
         #endregion
 
         #region POST
-        //Metodo per permettere allo studente di iscriversi e partecipare ad un corso
-        //Quindi l'utente si fa un piano di studi, in cui per prima cosa sceglie i corsi della propria facoltà
-        //Si deve prendere automaticamente id utente, id corso e metterli nella tabella
-        [Authorize]
+        //Metodo per permettere allo studente di iscriversi ad un corso
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpPost("CourseRegistration/{courseId}")]
         public async Task<IActionResult> AddToStudyPlan(string courseId)
         {
@@ -197,6 +133,7 @@ namespace BetaUni.Controllers
 
         #region DELETE
         //Disiscriversi da un corso
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpDelete("CourseUnsubscribe/{regId}")]
         public async Task<IActionResult> DeleteCourseRegistration(int regId)
         {
@@ -218,6 +155,11 @@ namespace BetaUni.Controllers
             return NoContent();
         }
         #endregion
+
+        private bool StudentCourseExists(int id)
+        {
+            return _context.StudentCourses.Any(e => e.Id == id);
+        }
     }
 }
 

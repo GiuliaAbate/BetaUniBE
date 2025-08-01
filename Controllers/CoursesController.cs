@@ -22,6 +22,7 @@ namespace BetaUni.Controllers
             _context = context;
         }
 
+        #region GET
         // GET: api/Courses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
@@ -42,85 +43,6 @@ namespace BetaUni.Controllers
 
             return course;
         }
-
-        // PUT: api/Courses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCourse(string id, Course course)
-        {
-            if (id != course.CourseId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(course).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CourseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Courses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Course>> PostCourse(Course course)
-        {
-            _context.Courses.Add(course);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CourseExists(course.CourseId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetCourse", new { id = course.CourseId }, course);
-        }
-
-        // DELETE: api/Courses/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCourse(string id)
-        {
-            var course = await _context.Courses.FindAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CourseExists(string id)
-        {
-            return _context.Courses.Any(e => e.CourseId == id);
-        }
-
-        #region GET
 
         //Metodo per prendere tutti i corsi data una facoltà (senza utente loggato)
         [HttpGet("GetCoursesByDep/{depID}")]
@@ -151,8 +73,8 @@ namespace BetaUni.Controllers
             return Ok(course);
         }
 
-        //Metodo per prendere tutti i corsi guardando la facoltà
-        [Authorize]
+        //Metodo per prendere tutti i corsi guardando la facoltà dello studente
+        [Authorize(AuthenticationSchemes = "StudentScheme")]
         [HttpGet("DepCourses")]
         public async Task<IActionResult> GetCoursesFromDepartment()
         {
@@ -164,7 +86,7 @@ namespace BetaUni.Controllers
 
             if (student == null)
             {
-                return NotFound("Utente non trovato");
+                return NotFound("Studente non trovato");
             }
 
             var course = await _context.Courses
@@ -174,8 +96,8 @@ namespace BetaUni.Controllers
             return Ok(course);
         }
 
-        //Metodo per prendere tutti i corsi ed esami collegati
-        //guardando la facoltà del professore
+        //Metodo per prendere tutti i corsi ed esami collegati guardando la facoltà del professore
+        [Authorize(AuthenticationSchemes = "ProfessorScheme")]
         [HttpGet("ProfDepCoursesExams")]
         public async Task<IActionResult> GetCoursesAndExams()
         {
@@ -190,21 +112,23 @@ namespace BetaUni.Controllers
                 return NotFound("Professore non trovato");
             }
 
-            //Si prendono prima di tutto i corsi controllando id della facoltà
+            //Si prendono i corsi controllando id della facoltà 
             var result = await _context.Courses
                 .Where(c => c.DepartmentId.Equals(professor.DepartmentId))
+                //Poi si vanno a prendere anche gli esami controllando che id del corso sia lo stesso
                 .SelectMany(c => _context.Exams
                     .Where(e => e.CourseId == c.CourseId)
+                    //Poi si selezionano le informazioni necessarie di entrambi
                     .Select(e => new
                     {
-                        CourseId = c.CourseId,
-                        CourseName = c.Name,
-                        StartDate = c.StartDate,
-                        EndDate = c.EndDate,
+                        c.CourseId,
+                        c.Name,
+                        c.StartDate,
+                        c.EndDate,
                         ExamName = e.Name,
                         e.Cfu,
                         e.Type,
-                        ExamId = e.ExamId
+                        e.ExamId
                     }))
                 .ToListAsync();
 
@@ -212,9 +136,88 @@ namespace BetaUni.Controllers
         }
         #endregion
 
-
         #region POST
+        // POST: api/Courses
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Course>> PostCourse(Course course)
+        {
+            _context.Courses.Add(course);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (CourseExists(course.CourseId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
+            return CreatedAtAction("GetCourse", new { id = course.CourseId }, course);
+        }
         #endregion
+
+        #region PUT
+        // PUT: api/Courses/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCourse(string id, Course course)
+        {
+            if (id != course.CourseId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(course).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CourseExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+        #endregion
+
+        #region DELETE
+        // DELETE: api/Courses/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCourse(string id)
+        {
+            var course = await _context.Courses.FindAsync(id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            _context.Courses.Remove(course);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+        #endregion
+
+        private bool CourseExists(string id)
+        {
+            return _context.Courses.Any(e => e.CourseId == id);
+        }
+
     }
 }
