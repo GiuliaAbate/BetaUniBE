@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace BetaUni.Other
 {
-    //Classe che contiene metodi vari
+    //Classe che contiene metodi vari di base
     public class Services
     {
         //Metodo per generare l'id del prof che deve essere composto da 6 lettere maiuscole

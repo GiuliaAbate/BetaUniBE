@@ -1,5 +1,6 @@
 ﻿namespace BetaUni.Other
 {
+    //Classe per gestire login
     public class Login
     {
         public string? Email { get; set; }
